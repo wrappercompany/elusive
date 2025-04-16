@@ -16,8 +16,10 @@ export function useChat() {
 
   // Handle message submission
   async function sendMessage(message: string) {
-    setLoading(true);
     try {
+      // Immediately show user message
+      setMessages((prev) => [...prev, { role: "user", content: message }]);
+      
       let pid = projectId;
       let tid = threadId;
       // Create project if needed
@@ -34,11 +36,12 @@ export function useChat() {
       }
       // Send message
       await proxyPost(`/api/thread/${tid}/message`, { content: message });
-      // Optimistically add user message
-      setMessages((prev) => [...prev, { role: "user", content: message }]);
+      
+      // Start loading for AI response
+      setLoading(true);
+      
       // Stream agent response
       let assistantMsg = "";
-      setLoading(true);
       await new Promise<void>((resolve, reject) => {
         const closeStream = streamAgent(tid!, {
           onChunk: (content) => {
@@ -65,8 +68,9 @@ export function useChat() {
           },
         });
       });
-    } finally {
+    } catch (error) {
       setLoading(false);
+      console.error('Error sending message:', error);
     }
   }
 

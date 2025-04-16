@@ -20,7 +20,6 @@ export function ChatPanel({ messages, loading, onSendMessage }: ChatPanelProps) 
             </span>
           </div>
         ))}
-        {loading && <div className="text-muted-foreground">Sending...</div>}
       </div>
       <ChatBoxInput
         onSubmit={onSendMessage}
