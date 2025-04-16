@@ -8,6 +8,9 @@ yarn.lock
 # Testing
 coverage
 
+.temp
+.venv
+uv.lock
 # Next.js
 .next/
 out/
