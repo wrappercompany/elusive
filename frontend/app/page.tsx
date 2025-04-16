@@ -15,7 +15,7 @@ export default function Home() {
         direction="horizontal"
         className="min-h-[400px] rounded-lg border"
       >
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={40}>
           <div className="flex h-full flex-col justify-between p-6">
             <div className="flex-1"></div>
             <ChatBoxInput
@@ -26,7 +26,7 @@ export default function Home() {
           </div>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={60}>
           <div className="flex h-full items-center justify-center p-6">
             <span className="font-semibold"></span>
           </div>
