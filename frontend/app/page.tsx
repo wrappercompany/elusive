@@ -6,7 +6,7 @@ import {
   ResizableHandle
 } from "@/components/ui/resizable";
 import { ChatPanel } from "@/components/ChatPanel";
-import { SidePanel } from "@/components/SidePanel";
+import { Previews } from "@/components/Previews";
 import { useChat } from "@/hooks/useChat";
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={60}>
-          <SidePanel />
+          <Previews />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
