@@ -19,30 +19,24 @@ export function ChatPanel({ messages, loading, onSendMessage }: ChatPanelProps) 
           <TabsTrigger value="document" className="flex-1">Document</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="chat" className="flex flex-col flex-grow h-[calc(100%-48px)] relative">
-          {/* Messages Container - Scrollable with no padding */}
-          <div className="absolute inset-0 overflow-y-auto">
-            <div className="pb-16"> {/* Extra padding at bottom for input overlap */}
-              {messages.map((msg, i) => (
-                <div key={i} className={`mb-3 px-2 ${msg.role === "user" ? "text-right" : "text-left"}`}>
-                  <span className="inline-block px-3 py-2 rounded bg-muted">
-                    {msg.content}
-                  </span>
-                </div>
-              ))}
-            </div>
+        <TabsContent value="chat" className="flex flex-col flex-grow h-[calc(100%-48px)]">
+          {/* Messages Container - Scrollable */}
+          <div className="flex-grow overflow-y-auto mb-4 border border-muted rounded-md p-2">
+            {messages.map((msg, i) => (
+              <div key={i} className={`mb-3 ${msg.role === "user" ? "text-right" : "text-left"}`}>
+                <span className="inline-block px-3 py-2 rounded bg-muted">
+                  {msg.content}
+                </span>
+              </div>
+            ))}
           </div>
           
-          {/* Input - Translucent and on top of messages */}
-          <div className="absolute bottom-0 left-0 right-0 p-2">
-            <div className="bg-background/60 backdrop-blur-md rounded-lg p-2 border border-muted/60 shadow-md">
-              <ChatBoxInput
-                onSubmit={onSendMessage}
-                placeholder="Type a message..."
-                className="w-full bg-transparent border-transparent focus-visible:border-transparent"
-              />
-            </div>
-          </div>
+          {/* Input - Fixed at bottom */}
+          <ChatBoxInput
+            onSubmit={onSendMessage}
+            placeholder="Type a message..."
+            className="w-full"
+          />
         </TabsContent>
         
         <TabsContent value="document" className="flex-grow h-[calc(100%-48px)]">
