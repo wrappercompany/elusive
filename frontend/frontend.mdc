@@ -5,4 +5,5 @@ alwaysApply: false
 ---
 
 Use bun package manager.
-Install and use shadcn packages like: bunx --bun shadcn@latest add button
+Install and use shadcn packages like: bunx --bun shadcn@latest add button.
+Add and use Magic UI like bun x --bun shadcn@latest add "https://magicui.design/r/globe.json"
