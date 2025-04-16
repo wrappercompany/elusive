@@ -8,7 +8,6 @@ from typing import Optional
 
 # Load environment variables
 from dotenv import load_dotenv
-import os
 load_dotenv()  # Load environment variables from .env file
 
 # Import services
@@ -18,14 +17,12 @@ from services.llm import make_llm_api_call
 # Models
 class ThreadCreate(BaseModel):
     project_id: str
-    account_id: Optional[str] = None
 
 class MessageCreate(BaseModel):
     content: str
 
 class ProjectCreate(BaseModel):
     name: str
-    account_id: Optional[str] = None
 
 # Create FastAPI instance
 @asynccontextmanager
@@ -63,19 +60,9 @@ async def create_project(project_data: ProjectCreate):
     db = DBConnection()
     client = await db.client
     
-    # Use provided account_id or generate a default one
-    account_id = project_data.account_id or str(uuid.uuid4())
-    
-    # First ensure the account exists
-    await client.table('accounts').upsert({
-        'id': account_id,
-        'name': 'Default Account'
-    }).execute()
-    
     # Create project
     project_result = await client.table('projects').insert({
         'name': project_data.name,
-        'account_id': account_id
     }).execute()
     
     return project_result.data[0]
@@ -86,16 +73,6 @@ async def create_thread(thread_data: ThreadCreate):
     db = DBConnection()
     client = await db.client
     
-    # Use provided account_id or generate a default one
-    account_id = thread_data.account_id or str(uuid.uuid4())
-    
-    # First ensure the account exists
-    await client.table('accounts').upsert({
-        'id': account_id,
-        'name': 'Default Account'
-    }).execute()
-    
-    # Check if project_id is a valid UUID
     project_id = thread_data.project_id
     if not is_valid_uuid(project_id):
         # Try to find project by name
@@ -108,7 +85,6 @@ async def create_thread(thread_data: ThreadCreate):
             # Create a new project with this name
             project_result = await client.table('projects').insert({
                 'name': project_id,
-                'account_id': account_id
             }).execute()
             project_id = project_result.data[0]['project_id']
     else:
@@ -120,7 +96,6 @@ async def create_thread(thread_data: ThreadCreate):
     # Create thread
     thread_result = await client.table('threads').insert({
         'project_id': project_id,
-        'account_id': account_id
     }).execute()
     
     return thread_result.data[0]
