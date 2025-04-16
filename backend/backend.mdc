@@ -1,0 +1,7 @@
+---
+description: 
+globs: .tsx,.json,.ts
+alwaysApply: false
+---
+
+Use Astral UV.
