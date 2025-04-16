@@ -19,7 +19,7 @@ const Textarea = React.forwardRef<
   return (
     <textarea
       className={cx(
-        'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+        'flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base ring-offset-transparent placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
         className,
       )}
       ref={ref}
@@ -157,7 +157,7 @@ function PureChatBoxInput({
         value={input}
         onChange={handleInput}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
+          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-transparent pb-10 dark:border-zinc-700/30 focus:outline-none focus:border-transparent focus:ring-0 focus-visible:ring-0',
           className,
         )}
         rows={2}
