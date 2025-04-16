@@ -18,7 +18,7 @@ export function ChatPanel({ messages, loading, onSendMessage }: ChatPanelProps) 
         
         <TabsContent value="chat" className="flex flex-col flex-grow h-[calc(100%-48px)]">
           {/* Messages Container - Scrollable */}
-          <div className="flex-grow overflow-y-auto mb-4 border border-muted rounded-md p-4">
+          <div className="flex-grow overflow-y-auto mb-4 p-4">
             {messages.map((msg, i) => (
               <div key={i} className="mb-4 flex justify-start">
                 {msg.role === "user" ? (
