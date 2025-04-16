@@ -5,6 +5,8 @@ import uuid
 from datetime import datetime, timezone
 from pydantic import BaseModel
 from typing import Optional
+from fastapi.responses import StreamingResponse
+import json
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -183,6 +185,61 @@ async def run_agent(thread_id: str):
         "status": "completed",
         "response": response.choices[0].message.content
     }
+
+@app.get("/api/thread/{thread_id}/agent/stream")
+async def stream_agent(thread_id: str):
+    db = DBConnection()
+    client = await db.client
+
+    # Create agent run
+    agent_run = await client.table('agent_runs').insert({
+        'thread_id': thread_id,
+        'status': 'running',
+        'started_at': datetime.now(timezone.utc).isoformat()
+    }).execute()
+
+    # Get thread messages
+    messages = await client.table('messages').select('*').eq('thread_id', thread_id).order('created_at').execute()
+
+    # Format messages for LLM
+    formatted_messages = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
+    for msg in messages.data:
+        role = "assistant" if msg.get('is_llm_message') else "user"
+        formatted_messages.append({"role": role, "content": msg.get('content')})
+
+    async def event_generator():
+        full_response = ""
+        try:
+            response_stream = await make_llm_api_call(
+                messages=formatted_messages,
+                model_name="gpt-4o",
+                temperature=0,
+                stream=True
+            )
+            async for chunk in response_stream:
+                # chunk is a dict from litellm, get the content
+                content = chunk.get('choices', [{}])[0].get('delta', {}).get('content', "")
+                if content:
+                    full_response += content
+                    yield f"data: {json.dumps({'type': 'chunk', 'content': content})}\n\n"
+            # Save response to DB
+            await client.table('messages').insert({
+                'thread_id': thread_id,
+                'type': 'text',
+                'content': full_response,
+                'is_llm_message': True
+            }).execute()
+            await client.table('agent_runs').update({
+                'status': 'completed',
+                'completed_at': datetime.now(timezone.utc).isoformat()
+            }).eq('id', agent_run.data[0]['id']).execute()
+            yield f"data: {json.dumps({'type': 'status', 'status': 'completed'})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 if __name__ == "__main__":
     import uvicorn

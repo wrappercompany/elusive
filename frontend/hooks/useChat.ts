@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { proxyPost, proxyGet } from "@/lib/api";
+import { proxyPost, proxyGet, streamAgent } from "@/lib/api";
 
 export type Message = {
   role: string;
@@ -34,16 +34,37 @@ export function useChat() {
       }
       // Send message
       await proxyPost(`/api/thread/${tid}/message`, { content: message });
-      // Run agent to get LLM response
-      await proxyPost(`/api/thread/${tid}/agent/run`, {});
-      // Fetch all messages for the thread
-      const msgs = await proxyGet(`/api/thread/${tid}/messages`);
-      setMessages(
-        msgs.map((m: any) => ({
-          role: m.is_llm_message ? "assistant" : "user",
-          content: m.content,
-        }))
-      );
+      // Optimistically add user message
+      setMessages((prev) => [...prev, { role: "user", content: message }]);
+      // Stream agent response
+      let assistantMsg = "";
+      setLoading(true);
+      await new Promise<void>((resolve, reject) => {
+        const closeStream = streamAgent(tid!, {
+          onChunk: (content) => {
+            assistantMsg += content;
+            setMessages((prev) => {
+              // If last message is assistant, append; else, add new
+              if (prev.length > 0 && prev[prev.length - 1].role === "assistant") {
+                return [
+                  ...prev.slice(0, -1),
+                  { role: "assistant", content: prev[prev.length - 1].content + content },
+                ];
+              } else {
+                return [...prev, { role: "assistant", content }];
+              }
+            });
+          },
+          onComplete: () => {
+            setLoading(false);
+            resolve();
+          },
+          onError: (err) => {
+            setLoading(false);
+            reject(err);
+          },
+        });
+      });
     } finally {
       setLoading(false);
     }
