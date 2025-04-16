@@ -1,9 +1,9 @@
 ---
 description: 
-globs: .tsx,.json,.ts
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 
-Use bun package manager.
+Use BUN package manager.
 Install and use shadcn packages like: bunx --bun shadcn@latest add button.
 Add and use Magic UI like bun x --bun shadcn@latest add "https://magicui.design/r/globe.json"
