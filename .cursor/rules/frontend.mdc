@@ -1,0 +1,8 @@
+---
+description: 
+globs: .tsx,.json,.ts
+alwaysApply: false
+---
+
+Use bun package manager.
+Install and use shadcn packages like: bunx --bun shadcn@latest add button
