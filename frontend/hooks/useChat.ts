@@ -8,75 +8,33 @@ export type Message = {
   content: string;
 };
 
-export function useChat() {
+export function useChat(projectId?: string) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [threadId, setThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Handle message submission
-  async function sendMessage(message: string) {
+  const sendMessage = async (content: string) => {
     try {
-      // Immediately show user message
-      setMessages((prev) => [...prev, { role: "user", content: message }]);
-      
-      let pid = projectId;
-      let tid = threadId;
-      // Create project if needed
-      if (!pid) {
-        const project = await proxyPost("/api/project", { name: "UI Project" });
-        pid = project.project_id;
-        setProjectId(pid);
-      }
-      // Create thread if needed
-      if (!tid) {
-        const thread = await proxyPost("/api/thread", { project_id: pid });
-        tid = thread.thread_id;
-        setThreadId(tid);
-      }
-      // Send message
-      await proxyPost(`/api/thread/${tid}/message`, { content: message });
-      
-      // Start loading for AI response
       setLoading(true);
-      
-      // Stream agent response
-      let assistantMsg = "";
-      await new Promise<void>((resolve, reject) => {
-        const closeStream = streamAgent(tid!, {
-          onChunk: (content) => {
-            assistantMsg += content;
-            setMessages((prev) => {
-              // If last message is assistant, append; else, add new
-              if (prev.length > 0 && prev[prev.length - 1].role === "assistant") {
-                return [
-                  ...prev.slice(0, -1),
-                  { role: "assistant", content: prev[prev.length - 1].content + content },
-                ];
-              } else {
-                return [...prev, { role: "assistant", content }];
-              }
-            });
-          },
-          onComplete: () => {
-            setLoading(false);
-            resolve();
-          },
-          onError: (err) => {
-            setLoading(false);
-            reject(err);
-          },
-        });
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          content,
+          projectId // Include projectId in the request
+        })
       });
-    } catch (error) {
-      setLoading(false);
-      console.error('Error sending message:', error);
-    }
-  }
 
-  return {
-    messages,
-    loading,
-    sendMessage
+      if (!response.ok) throw new Error('Failed to send message');
+      
+      const newMessage = await response.json();
+      setMessages(prev => [...prev, newMessage]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  return { messages, loading, sendMessage };
 } 

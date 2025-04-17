@@ -1,7 +1,11 @@
 import React from 'react';
 import Iphone15Pro from './magicui/iphone-15-pro';
 
-export function Previews() {
+interface PreviewsProps {
+  projectId: string;
+}
+
+export function Previews({ projectId }: PreviewsProps) {
   // Use the original SVG size for the phone
   const baseWidth = 433;
   const baseHeight = 882;
