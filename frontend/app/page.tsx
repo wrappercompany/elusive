@@ -8,6 +8,7 @@ import {
 import { ChatPanel } from "@/components/ChatPanel";
 import { Previews } from "@/components/Previews";
 import { useChat } from "@/hooks/useChat";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Home() {
   const { messages, loading, sendMessage } = useChat();
