@@ -44,3 +44,9 @@ next-env.d.ts
 bun.lock
 bun.lockb
 .bunfig.local.toml
+
+# Prisma
+/lib/generated/prisma
+.prisma/client
+*.db
+*.db-journal

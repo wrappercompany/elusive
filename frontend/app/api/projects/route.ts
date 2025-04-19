@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { prisma } from '@/lib/prisma';
 
 // GET /api/projects - Get all projects
 export async function GET() {
   try {
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
+    const projects = await prisma.project.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
 
     return NextResponse.json(projects);
   } catch (error) {
@@ -24,13 +23,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, description = null } = body;
 
-    const { data: project, error } = await supabase
-      .from('projects')
-      .insert([{ name, description }])
-      .select()
-      .single();
-
-    if (error) throw error;
+    const project = await prisma.project.create({
+      data: {
+        name,
+        description
+      }
+    });
 
     return NextResponse.json(project);
   } catch (error) {
